@@ -2,12 +2,11 @@ package com.shivamdev.galleryimagepicker;
 
 import android.content.Context;
 import android.content.CursorLoader;
-import android.database.Cursor;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Created by shivamchopra on 14/08/15.
@@ -24,37 +24,33 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
 
 
     //define source of MediaStore.Images.Media, internal or external storage
-    final Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    final String[] projections = {MediaStore.Images.Media._ID,
+    public static final Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+    public static final String[] projections = {MediaStore.Images.Media._ID,
             MediaStore.Images.Media.DATA,
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Images.Media.BUCKET_ID,
             MediaStore.Images.Media.DISPLAY_NAME};
     Context context;
     LayoutInflater inflater;
-    Cursor cursor = null;
-    ArrayList<String> myList = new ArrayList<>();
-    String imageName;
-    String imagePath;
-    String imageBucket;
-    String bucketId;
-    String selection = "1) GROUP BY 1,(2";
-    String[] selectionArgs = {"MAX(datetaken) DESC"};
     String sortOrder = MediaStore.Images.Media.DATE_ADDED + " ASC";
 
-    HashMap<String, ArrayList<String>> folderMap = new HashMap<>();
+    LinkedHashMap<String, ArrayList<String>> folderMap = new LinkedHashMap<>();
 
     int count;
+    private List<PhotosModel> data;
 
 
-    public GalleryPickerAdapter(Context context, ArrayList<String> list) {
+    public GalleryPickerAdapter(Context context) {
         this.context = context;
 
-        // Taking the list size from previous Activity as Cursor.getCount() is not working.
-        this.myList = list;
         inflater = LayoutInflater.from(context);
     }
 
+
+    public void setData(List<PhotosModel> data) {
+        this.data = data;
+        this.notifyDataSetChanged();
+    }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -62,43 +58,34 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
         return new MyViewHolder(myView);
     }
 
+
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(final MyViewHolder holder, int position) {
 
-        try {
+        final PhotosModel model = data.get(position);
 
-            CursorLoader cl = new CursorLoader(context, uri, projections, null, null, sortOrder);
-            cursor = cl.loadInBackground();
+        new AsyncTask<Void, Void, Bitmap>() {
+            @Override
+            protected Bitmap doInBackground(Void... params) {
 
-            while(cursor.moveToNext()){
-                    imageName = cursor.getString(cursor.getColumnIndex(projections[4]));
-                    Log.d("Image Name ", imageName);
-                    imageBucket = cursor.getString(cursor.getColumnIndex(projections[2]));
-                    Log.d("Image Bucket ", imageBucket);
-                    bucketId = cursor.getString(cursor.getColumnIndex(projections[3]));
-                    Log.d("Bucket Id ", bucketId);
-                    imagePath = cursor.getString(cursor.getColumnIndex(projections[1]));
-                    Log.d("Image Path ", imagePath);
-                    myList.add(imagePath);
-                    folderMap.put(imageBucket, myList);
-
-
+                Bitmap thumb = BitmapDecoder.decodeBitmapFromFile(model.getImagePath(), 400, 400);
+                //return Bitmap.createScaledBitmap(thumb, 400, 400, false);
+                return thumb;
             }
-            holder.iv_grid.setImageBitmap(BitmapFactory.decodeFile(imagePath));
-            holder.tv_grid.setText(imageBucket);
-            count = cursor.getCount();
-            Log.d("Last Index : ", " " + myList.size());
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                holder.iv_grid.setImageBitmap(bitmap);
             }
-        }
+        }.execute();
+
+        holder.tv_grid.setText(model.getImageName() == null ? model.getImageBucket() : model.getImageName());
     }
 
     @Override
     public int getItemCount() {
         // cursor.getCount() not working so for making it work right now using myList.size() which returns total images
-        return myList.size();
+        return data.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -112,6 +99,14 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
             row = itemView;
             iv_grid = (ImageView) row.findViewById(R.id.gv_image);
             tv_grid = (TextView) row.findViewById(R.id.gv_title);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CursorLoader cl = new CursorLoader(context, uri, projections, projections[3] + " = \"" + data.get(getLayoutPosition()).getBucketId() + "\"", null, sortOrder);
+                    setData(PhotosData.getData(false, cl.loadInBackground()));
+                }
+            });
         }
     }
 }

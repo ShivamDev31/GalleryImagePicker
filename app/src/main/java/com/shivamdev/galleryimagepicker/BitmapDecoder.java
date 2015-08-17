@@ -26,9 +26,9 @@ public class BitmapDecoder {
     }
 
 
-    private static int calculateSampleSize(BitmapFactory.Options options,
-                                           int reqHeight,
-                                           int reqWidth) {
+    public static int calculateSampleSize(BitmapFactory.Options options,
+                                          int reqHeight,
+                                          int reqWidth) {
 
         // Raw height and width of image
         final int height = options.outHeight;
@@ -52,5 +52,4 @@ public class BitmapDecoder {
         return inSampleSize;
 
     }
-
 }
