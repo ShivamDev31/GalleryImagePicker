@@ -1,4 +1,4 @@
-package com.shivamdev.galleryimagepicker;
+package com.shivamdev.galleryimagepicker.datamodel;
 
 /**
  * Created by shivamchopra on 17/08/15.

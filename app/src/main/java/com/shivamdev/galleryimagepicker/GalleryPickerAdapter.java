@@ -1,20 +1,26 @@
 package com.shivamdev.galleryimagepicker;
 
 import android.content.Context;
-import android.content.CursorLoader;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import com.shivamdev.galleryimagepicker.datamodel.PhotosData;
+import com.shivamdev.galleryimagepicker.datamodel.PhotosModel;
+
 import java.util.List;
 
 /**
@@ -30,14 +36,11 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
             MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Images.Media.BUCKET_ID,
             MediaStore.Images.Media.DISPLAY_NAME};
-    Context context;
+    private Context context;
     LayoutInflater inflater;
-    String sortOrder = MediaStore.Images.Media.DATE_ADDED + " ASC";
+    static String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
 
-    LinkedHashMap<String, ArrayList<String>> folderMap = new LinkedHashMap<>();
-
-    int count;
-    private List<PhotosModel> data;
+    static List<PhotosModel> data;
 
 
     public GalleryPickerAdapter(Context context) {
@@ -48,7 +51,7 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
 
 
     public void setData(List<PhotosModel> data) {
-        this.data = data;
+        GalleryPickerAdapter.data = data;
         this.notifyDataSetChanged();
     }
 
@@ -68,7 +71,7 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
             @Override
             protected Bitmap doInBackground(Void... params) {
 
-                Bitmap thumb = BitmapDecoder.decodeBitmapFromFile(model.getImagePath(), 400, 400);
+                Bitmap thumb = BitmapDecoder.decodeBitmapFromFile(model.getImagePath(), 200, 200);
                 //return Bitmap.createScaledBitmap(thumb, 400, 400, false);
                 return thumb;
             }
@@ -78,13 +81,15 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
                 holder.iv_grid.setImageBitmap(bitmap);
             }
         }.execute();
-
-        holder.tv_grid.setText(model.getImageName() == null ? model.getImageBucket() : model.getImageName());
+        if (PhotosData.dir) {
+            holder.tv_grid.setText(model.getImageName() == null ? model.getImageBucket() : model.getImageName());
+        } else {
+            holder.tv_grid.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public int getItemCount() {
-        // cursor.getCount() not working so for making it work right now using myList.size() which returns total images
         return data.size();
     }
 
@@ -103,10 +108,33 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    CursorLoader cl = new CursorLoader(context, uri, projections, projections[3] + " = \"" + data.get(getLayoutPosition()).getBucketId() + "\"", null, sortOrder);
-                    setData(PhotosData.getData(false, cl.loadInBackground()));
+                    if (PhotosData.dir) {
+                        openBucketFragment();
+                    } else {
+                        openImageFragment();
+                    }
                 }
             });
+        }
+
+        private void openBucketFragment() {
+            Toast.makeText(context, "Clicked on the bucket at :" + getLayoutPosition(), Toast.LENGTH_LONG).show();
+            Log.d("MyTag", "Bucket clicked");
+            // Do something when clicked on a bucket
+            FragmentGrid fg = FragmentGrid.newInstance(getLayoutPosition());
+            Bundle args = new Bundle();
+            
+            FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.view_holder, fg);
+            //ft.add(R.id.view_holder, fg);
+            ft.addToBackStack("images");
+            ft.commit();
+        }
+
+        private void openImageFragment() {
+            Toast.makeText(context, "Clicked on the image at :" + getLayoutPosition(), Toast.LENGTH_LONG).show();
+            Log.d("MyTag", "Image clicked");
         }
     }
 }

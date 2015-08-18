@@ -1,6 +1,8 @@
-package com.shivamdev.galleryimagepicker;
+package com.shivamdev.galleryimagepicker.datamodel;
 
 import android.database.Cursor;
+
+import com.shivamdev.galleryimagepicker.GalleryPickerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +11,14 @@ import java.util.List;
  * Created by shivamchopra on 17/08/15.
  */
 public class PhotosData {
-    public static List<PhotosModel> getData(boolean home, Cursor cursor) {
 
+    public static boolean dir;
+
+    public static List<PhotosModel> getData(boolean home, Cursor cursor) {
+        dir = home;
         List<PhotosModel> photos = new ArrayList<>();
-        List<String> ids = new ArrayList<>();
+        List<String> bucketIds = new ArrayList<>();
+        List<String> imagePaths = new ArrayList<>();
 
         String[] projections = GalleryPickerAdapter.projections;
 
@@ -25,13 +31,17 @@ public class PhotosData {
 
             if (home) {
                 model = new PhotosModel(bucketId, imageBucket, imagePath, null);
-                if (!ids.contains(bucketId)) {
+                if (!bucketIds.contains(bucketId)) {
                     photos.add(model);
-                    ids.add(bucketId);
+                    bucketIds.add(bucketId);
                 }
             } else {
                 model = new PhotosModel(bucketId, imageBucket, imagePath, imageName);
-                photos.add(model);
+
+                if (!imagePaths.contains(imagePath)) {
+                    photos.add(model);
+                    imagePaths.add(imagePath);
+                }
             }
         }
         return photos;
