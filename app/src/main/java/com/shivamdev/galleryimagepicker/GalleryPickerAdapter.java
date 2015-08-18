@@ -121,9 +121,9 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
             Toast.makeText(context, "Clicked on the bucket at :" + getLayoutPosition(), Toast.LENGTH_LONG).show();
             Log.d("MyTag", "Bucket clicked");
             // Do something when clicked on a bucket
-            FragmentGrid fg = FragmentGrid.newInstance(getLayoutPosition());
+            FragmentImages fg = FragmentImages.newInstance(getLayoutPosition());
             Bundle args = new Bundle();
-            
+
             FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             ft.replace(R.id.view_holder, fg);
@@ -134,7 +134,9 @@ public class GalleryPickerAdapter extends RecyclerView.Adapter<GalleryPickerAdap
 
         private void openImageFragment() {
             Toast.makeText(context, "Clicked on the image at :" + getLayoutPosition(), Toast.LENGTH_LONG).show();
-            Log.d("MyTag", "Image clicked");
+            String path = data.get(getLayoutPosition()).getImagePath();
+            Toast.makeText(context, "Clicked on the image path at :" + path, Toast.LENGTH_LONG).show();
+            Log.d("MyTag", "Image clicked path : " + path);
         }
     }
 }

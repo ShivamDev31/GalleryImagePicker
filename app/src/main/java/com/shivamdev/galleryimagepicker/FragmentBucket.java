@@ -32,15 +32,6 @@ public class FragmentBucket extends Fragment {
         return fb;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (adapter == null) {
-            adapter = new GalleryPickerAdapter(getActivity());
-        }
-        glm = new GridLayoutManager(getActivity(), 2);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,7 +44,10 @@ public class FragmentBucket extends Fragment {
     private void loadBucket(View view) {
         pbMain = (ProgressBar) view.findViewById(R.id.pb_main);
         rv = (RecyclerView) view.findViewById(R.id.rv_main_grid);
-
+        if (adapter == null) {
+            adapter = new GalleryPickerAdapter(getActivity());
+        }
+        glm = new GridLayoutManager(getActivity(), 2);
         rv.setLayoutManager(glm);
         rv.setAdapter(adapter);
         pbMain.setVisibility(View.VISIBLE);

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,7 @@ import com.shivamdev.galleryimagepicker.datamodel.PhotosData;
 /**
  * Created by shivamchopra on 18/08/15.
  */
-public class FragmentGrid extends Fragment {
+public class FragmentImages extends Fragment {
 
     RecyclerView rv;
     GridLayoutManager glm;
@@ -30,8 +31,8 @@ public class FragmentGrid extends Fragment {
     String path;
     static int position;
 
-    public static FragmentGrid newInstance(int pos) {
-        FragmentGrid fg = new FragmentGrid();
+    public static FragmentImages newInstance(int pos) {
+        FragmentImages fg = new FragmentImages();
         position = pos;
 
         return fg;
@@ -40,10 +41,6 @@ public class FragmentGrid extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (adapter == null) {
-            adapter = new GalleryPickerAdapter(getActivity());
-        }
-        glm = new GridLayoutManager(getActivity(), 2);
 
     }
 
@@ -54,6 +51,10 @@ public class FragmentGrid extends Fragment {
 
         view = inflater.inflate(R.layout.fragment_grid, container, false);
         rv = (RecyclerView) view.findViewById(R.id.rv_main_grid);
+        if (adapter == null) {
+            adapter = new GalleryPickerAdapter(getActivity());
+        }
+        glm = new GridLayoutManager(getActivity(), 2);
 
 
         rv.setLayoutManager(glm);
@@ -68,6 +69,8 @@ public class FragmentGrid extends Fragment {
 
     void loadImages() {
         cl = new CursorLoader(getActivity(), GalleryPickerAdapter.uri, GalleryPickerAdapter.projections, GalleryPickerAdapter.projections[3] + " = \"" + GalleryPickerAdapter.data.get(position).getBucketId() + "\"", null, GalleryPickerAdapter.sortOrder);
+        Log.d("ImageBucket Cursor : ", GalleryPickerAdapter.projections[3] + " = \"" + GalleryPickerAdapter.data.get(position).getBucketId());
+        Log.d("ImageBucket Cursor : ", GalleryPickerAdapter.projections[3] + " = " + GalleryPickerAdapter.data.get(position).getBucketId());
 
         try {
             cursor = cl.loadInBackground();
