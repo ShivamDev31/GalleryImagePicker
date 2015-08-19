@@ -1,5 +1,7 @@
 package com.shivamdev.galleryimagepicker.datamodel;
 
+import android.util.Log;
+
 /**
  * Created by shivamchopra on 17/08/15.
  */
@@ -12,6 +14,15 @@ public class PhotosModel {
         this.imageBucket = imageBucket;
         this.imageName = imageName;
         this.imagePath = imagePath;
+        Log.d("MyTag", "PhotoModel");
+    }
+
+    public String getBucketId() {
+        return bucketId;
+    }
+
+    public String getImageBucket() {
+        return imageBucket;
     }
 
     public String getImageName() {
@@ -22,11 +33,5 @@ public class PhotosModel {
         return imagePath;
     }
 
-    public String getBucketId() {
-        return bucketId;
-    }
 
-    public String getImageBucket() {
-        return imageBucket;
-    }
 }

@@ -1,6 +1,7 @@
 package com.shivamdev.galleryimagepicker.datamodel;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import com.shivamdev.galleryimagepicker.GalleryPickerAdapter;
 
@@ -21,7 +22,7 @@ public class PhotosData {
         List<String> imagePaths = new ArrayList<>();
 
         String[] projections = GalleryPickerAdapter.projections;
-
+        Log.d("MyTag", "PhotosData");
         while (cursor.moveToNext()) {
             String imageName = cursor.getString(cursor.getColumnIndex(projections[4]));
             String imageBucket = cursor.getString(cursor.getColumnIndex(projections[2]));
@@ -40,7 +41,7 @@ public class PhotosData {
 
                 if (!imagePaths.contains(imagePath)) {
                     photos.add(model);
-                    imagePaths.add(imagePath);
+                    //imagePaths.add(imagePath);
                 }
             }
         }
